@@ -1,4 +1,5 @@
 #implement tables
+from pydantic_core.core_schema import nullable_schema
 from sqlalchemy import Column,String,DateTime,Boolean, null
 from sqlalchemy.dialects.postgresql import UUID
 from sqlalchemy.ext.declarative import declarative_base
@@ -9,6 +10,7 @@ import uuid
 Base = declarative_base()
 
 class User(Base):
+
     __tablename__ = "users"
 
     id = Column(UUID(as_uuid=True),primary_key = True, default = uuid.uuid4, index = True)
@@ -16,3 +18,7 @@ class User(Base):
     first_name = Column(String(100), nullable = False),
     last_name = Column(String(100), nullable = False)
     country = Column(String(100),nullable = False)
+    city = Column(String(100),nullable = False)
+    zip_code = Column(String(100),nullable = False)
+    shipping_address_1 = Column(String(100),nullable = False)
+    shipping_address_2 = Column(String(100),nullable = True)

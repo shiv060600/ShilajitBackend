@@ -1,3 +1,4 @@
+from itertools import product
 from pydantic import BaseModel,field_validator,model_validator,ValidationError
 from typing import Optional
 import datetime
@@ -54,7 +55,7 @@ class UserUpdate(BaseModel):
     state: str
     zip_code: str
     shipping_address_1: str
-    shipping_address_2: str
+    shipping_address_2: Optional[str]
     @model_validator(mode='after')
     def validate_user(self):
         try:
@@ -101,7 +102,74 @@ class CartItem(BaseModel):
     id: str
     user_id: str
     product_id: str
+    product_name:str
+    quantity: int
+
+class UpdateCartItem(BaseModel):
+    id: str
+    quantity: int
+
+    @model_validator(mode='after')
+    def validate_update_cart_item(self):
+        if self.quantity < 0:
+            raise ValidationError("quanitity can be less than 0")
+        if not self.quantity:
+            raise ValidationError("Quanitity cannot be null")
+
+        try:
+            uuid.UUID(self.id)
+        except ValueError as ve:
+            print(f"Value error when updating validate: {ve}")
+            raise ValidationError("Failed to validate user id")
+        return self
+
+class DeleteCartItem(BaseModel):
+    id:str
+    @model_validator(mode='after')
+    def validate_delete_cart_item(self):
+        try:
+            uuid.UUID(self.id)
+        except ValueError as ve:
+            print(f"invalid uuid: {ve}")
+            raise ValidationError("Failed to validate user id")
+        return self
+
+class CartItemResponse(BaseModel):
+    user_id: str
+    product_id: str
+    product_name: str
+    quantity: int
+
+class Order(BaseModel):
+    id: str
+    user_id: str
+    product_ids: list[str]
+    product_quantities: list[int]
 
 
+class CreateOrder(BaseModel):
+    user_id: str
+    product_ids: list[str]
+    product_quantities: list[int]
+    @model_validator(mode='after')
+    def validate_create_order(self):
+        if len(self.product_ids) != len(self.product_quantities):
+            raise ValidationError("length of products does not match length of quantities")
+        
+        if not all(qty != 0 for qty in self.product_quantities):
+            raise ValidationError("cannot order quantity zero")
+        
+        
+        for id in self.product_ids:
+            try:
+                uuid.UUID(id)
+            except ValueError as ve:
+                print(f"product id is not a valid UUID")
+                raise ValidationError("Product ID is not a valid uuid")
+
+        return self
+
+        
+        
 
 
