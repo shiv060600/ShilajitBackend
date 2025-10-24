@@ -166,8 +166,31 @@ class CreateOrder(BaseModel):
             except ValueError as ve:
                 print(f"product id is not a valid UUID")
                 raise ValidationError("Product ID is not a valid uuid")
-
         return self
+
+class DeleteOrder(BaseModel):
+    id: str
+    @model_validator(mode='after')
+    def validate_delete_order(self):
+        if not self.id:
+            raise ValidationError("user_id required")
+        try:
+            uuid.UUID(self.id)
+            
+        except ValueError("user_id is not type uuid, type uuid required"):
+            raise ValueError("user_id is not type uuid")
+
+class Product(BaseModel):
+    id: str
+    description: str
+    price: float
+    created_at: datetime.datetime
+    updated_at: datetime.datetime
+
+
+    
+
+
 
         
         
